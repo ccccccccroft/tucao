@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>老师吐槽墙 · 综合评分</title>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+    }
+    body {
+      background: #f7f9fc;
+      color: #1e293b;
+      padding: 2rem 1rem;
+    }
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-weight: 600;
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 3px solid #e2e8f0;
+      padding-bottom: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+    h1 i {
+      color: #b91c1c;
+    }
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2rem;
+      background: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 60px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .search-bar i {
+      color: #94a3b8;
+      font-size: 1.1rem;
+    }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      padding: 10px 6px;
+      font-size: 1rem;
+      background: transparent;
+      outline: none;
+      min-width: 160px;
+    }
+    .search-bar .search-hint {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .search-bar .btn {
+      background: #b91c1c;
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      border-radius: 40px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .search-bar .btn:hover {
+      background: #991b1b;
+      transform: scale(0.97);
+    }
+    .search-results {
+      background: white;
+      border-radius: 24px;
+      padding: 0.8rem 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #e2e8f0;
+      display: none;
+    }
+    .search-results.active {
+      display: block;
+    }
+    .search-results .result-item {
+      padding: 8px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: 0.1s;
+      display: inline-block;
+      margin: 4px 8px 4px 0;
+      background: #f1f5f9;
+    }
+    .search-results .result-item:hover {
+      background: #b91c1c20;
+      color: #b91c1c;
+    }
+    .search-results .result-item i {
+      margin-right: 6px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 1.5rem 1.8rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,20,40,0.04);
+      border: 1px solid #edf2f7;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      font-weight: 600;
+      color: #0f172a;
+      border-bottom: 1px dashed #e2e8f0;
+      padding-bottom: 0.6rem;
+    }
+    .card-header i {
+      color: #b91c1c;
+      margin-right: 6px;
+    }
+    .profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+      flex-wrap: wrap;
+    }
+    .avatar {
+      width: 48px;
+      height: 48px;
+      background: #dbeafe;
+      border-radius: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: #1e3a8a;
+    }
+    .profile-name {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+    .profile-sub {
+      color: #64748b;
+      font-size: 0.9rem;
+    }
+    .profile-score {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 4px 14px 4px 10px;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #0f172a;
+      margin-left: auto;
+    }
+    .profile-score i {
+      color: #f59e0b;
+    }
+
+    .post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1.2rem;
+      max-height: 420px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .post-item {
+      background: #f8fafc;
+      border-radius: 18px;
+      padding: 0.9rem 1.2rem;
+      border-left: 4px solid #b91c1c20;
+      transition: 0.1s;
+    }
+    .post-item:hover {
+      background: #f1f5f9;
+    }
+    .post-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: #334155;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .post-meta .name {
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .post-meta .badge {
+      background: #e2e8f0;
+      padding: 0 10px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      color: #1e293b;
+    }
+    .post-content {
+      font-size: 0.98rem;
+      line-height: 1.5;
+      margin: 6px 0 8px 0;
+    }
+    .post-actions {
+      display: flex;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: #475569;
+      margin-top: 4px;
+    }
+    .post-actions i {
+      margin-right: 4px;
+      cursor: default;
+    }
+    .post-actions span {
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .post-actions span:hover {
+      color: #b91c1c;
+    }
+    .mention {
+      background: #dbeafe;
+      padding: 0 6px;
+      border-radius: 12px;
+      color: #1e3a8a;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .mention:hover {
+      background: #b91c1c20;
+      color: #b91c1c;
+      text-decoration: underline;
+    }
+
+    .input-area {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .input-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .input-row input, .input-row textarea {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 40px;
+      border: 1px solid #d1d9e6;
+      font-size: 0.9rem;
+      background: white;
+      transition: 0.15s;
+    }
+    .input-row input:focus, .input-row textarea:focus {
+      outline: none;
+      border-color: #b91c1c;
+      box-shadow: 0 0 0 3px #b91c1c20;
+    }
+    .input-row textarea {
+      border-radius: 20px;
+      resize: vertical;
+      min-height: 60px;
+    }
+    .btn {
+      background: #b91c1c;
+      color: white;
+      border: none;
+      padding: 8px 22px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: #991b1b;
+      transform: scale(0.97);
+    }
+    .btn-sm {
+      padding: 4px 14px;
+      font-size: 0.8rem;
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      color: #64748b;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0.5rem;
+    }
+
+    .teacher-home, .student-home {
+      background: white;
+      border-radius: 24px;
+      padding: 1.5rem 1.8rem;
+      border: 1px solid #edf2f7;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .empty-state {
+      color: #94a3b8;
+      font-style: italic;
+      padding: 0.8rem 0;
+      text-align: center;
+    }
+
+    .footer-tip {
+      margin-top: 2rem;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 1.5rem;
+    }
+    .footer-tip i {
+      color: #b91c1c;
+    }
+
+    .reply {
+      margin-left: 1.8rem;
+      padding-left: 0.8rem;
+      border-left: 2px solid #d1d9e6;
+      margin-top: 6px;
+      font-size: 0.9rem;
+      background: #f1f5f9;
+      border-radius: 0 12px 12px 0;
+      padding: 6px 12px;
+    }
+    .reply .post-meta {
+      font-size: 0.75rem;
+    }
+    .profile-badge .edit-icon {
+      margin-left: 8px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .score-tag {
+      background: #fef3c7;
+      border-radius: 30px;
+      padding: 2px 12px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      color: #92400e;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+  <h1><i class="fas fa-chalkboard-teacher"></i> 老师吐槽墙 · 评分</h1>
+
+  <!-- 搜索栏 -->
+  <div class="search-bar">
+    <i class="fas fa-search"></i>
+    <input type="text" id="searchInput" placeholder="搜索老师或学生 (如: 张老师, 小美)" />
+    <button class="btn" id="searchBtn"><i class="fas fa-arrow-right"></i> 跳转</button>
+    <span class="search-hint"><i class="fas fa-mouse-pointer"></i> 点击@名字直达主页</span>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+
+  <div class="grid">
+    <!-- 左侧：全局动态 -->
+    <div class="card">
+      <div class="card-header">
+        <span><i class="fas fa-comment-dots"></i> 最近吐槽</span>
+        <span style="font-weight:400; font-size:0.8rem; color:#64748b;"><i class="far fa-clock"></i> 实时</span>
+      </div>
+      <div class="post-list" id="globalFeed"></div>
+
+      <!-- 快速发布 -->
+      <div class="input-area">
+        <div class="input-row">
+          <input type="text" id="quickAuthor" placeholder="你的名字" value="匿名同学" style="flex:0.7;">
+          <select id="quickTarget" style="flex:1.2; padding:8px 12px; border-radius:40px; border:1px solid #d1d9e6; background:white;">
+            <option value="teacher-张老师">👨‍🏫 张老师</option>
+            <option value="teacher-李老师">👩‍🏫 李老师</option>
+            <option value="teacher-王老师">👨‍🏫 王老师</option>
+            <option value="student-小美">🙋 小美</option>
+            <option value="student-阿杰">🙋 阿杰</option>
+            <option value="student-小智">🙋 小智</option>
+          </select>
+        </div>
+        <div class="input-row">
+          <textarea id="quickContent" placeholder="写一条吐槽… 支持 @ 老师或同学"></textarea>
+          <button class="btn" id="quickPostBtn"><i class="fas fa-pen"></i> 发布</button>
+        </div>
+        <div style="font-size:0.75rem; color:#94a3b8;"><i class="fas fa-info-circle"></i> 发布到所选老师/学生的主页</div>
+      </div>
+    </div>
+
+    <!-- 右侧：老师主页 + 学生主页 -->
+    <div class="right-col">
+      <div class="teacher-home" id="teacherHome">
+        <div class="profile-badge" id="teacherBadge">
+          <div class="avatar"><i class="fas fa-chalkboard"></i></div>
+          <div>
+            <div class="profile-name" id="teacherNameDisplay">张老师</div>
+            <div class="profile-sub"><i class="fas fa-school"></i> 老师主页 · 吐槽集中地</div>
+          </div>
+          <span class="profile-score" id="teacherScoreDisplay">
+            <i class="fas fa-star"></i> <span id="teacherScoreValue">0.0</span>
+          </span>
+          <span class="edit-icon"><i class="fas fa-chevron-down"></i></span>
+        </div>
+        <div class="subtitle"><i class="fas fa-reply-all"></i> 学生们的吐槽</div>
+        <div id="teacherPostList" class="post-list"></div>
+        <div class="input-area" style="margin-top:0.8rem;">
+          <div class="input-row">
+            <input type="text" id="teacherReplyAuthor" placeholder="你的名字" value="匿名同学" style="flex:1;">
+          </div>
+          <div class="input-row">
+            <textarea id="teacherReplyContent" placeholder="直接对老师吐槽…"></textarea>
+            <button class="btn btn-sm" id="teacherReplyBtn"><i class="fas fa-arrow-right"></i> 吐槽</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="student-home" id="studentHome">
+        <div class="profile-badge" id="studentBadge">
+          <div class="avatar"><i class="fas fa-user-graduate"></i></div>
+          <div>
+            <div class="profile-name" id="studentNameDisplay">小美</div>
+            <div class="profile-sub"><i class="fas fa-user-friends"></i> 学生主页 · 日常吐槽</div>
+          </div>
+          <span class="edit-icon"><i class="fas fa-chevron-down"></i></span>
+        </div>
+        <div class="subtitle"><i class="fas fa-share-alt"></i> 分享的日常吐槽</div>
+        <div id="studentPostList" class="post-list"></div>
+        <div class="input-area" style="margin-top:0.8rem;">
+          <div class="input-row">
+            <input type="text" id="studentPostAuthor" placeholder="你的名字" value="匿名同学" style="flex:1;">
+          </div>
+          <div class="input-row">
+            <textarea id="studentPostContent" placeholder="分享日常吐槽…"></textarea>
+            <button class="btn btn-sm" id="studentPostBtn"><i class="fas fa-plus"></i> 分享</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-tip">
+    <i class="fas fa-at"></i> 点击任何 @名字 直接跳转主页 · 评分基于吐槽数量
+  </div>
+</div>
+
+<script>
+  (function() {
+    // ----- 数据 -----
+    const teachers = ['张老师', '李老师', '王老师'];
+    const students = ['小美', '阿杰', '小智'];
+    const allEntities = [...teachers.map(t => ({ name: t, type: 'teacher' })), ...students.map(s => ({ name: s, type: 'student' }))];
+
+    let posts = [];
+    let postIdCounter = 0;
+
+    function seedData() {
+      const now = Date.now();
+      const seed = [
+        { author: '小美', content: '张老师今天拖堂了 😤  @张老师', targetId: 'teacher-张老师', targetType: 'teacher' },
+        { author: '阿杰', content: '李老师的作业太多了！ @李老师', targetId: 'teacher-李老师', targetType: 'teacher' },
+        { author: '小智', content: '王老师上课好有趣 但是讲的太快了 @王老师', targetId: 'teacher-王老师', targetType: 'teacher' },
+        { author: '匿名同学', content: '张老师 能不能少点默写 😭', targetId: 'teacher-张老师', targetType: 'teacher' },
+        { author: '小美', content: '今天食堂的饭好难吃 (日常吐槽)', targetId: 'student-小美', targetType: 'student' },
+        { author: '阿杰', content: '数学考砸了 好难过', targetId: 'student-阿杰', targetType: 'student' },
+        { author: '小智', content: '周末还要补课 呜呜', targetId: 'student-小智', targetType: 'student' },
+      ];
+      seed.forEach((s, idx) => {
+        const replies = [];
+        if (idx === 0) replies.push({ author: '阿杰', content: '@小美 张老师确实爱拖堂', timestamp: now - 120000 });
+        if (idx === 1) replies.push({ author: '小美', content: '@阿杰 我也觉得 李老师留了3张卷子', timestamp: now - 80000 });
+        posts.push({
+          id: postIdCounter++,
+          author: s.author,
+          content: s.content,
+          targetId: s.targetId,
+          targetType: s.targetType,
+          timestamp: now - idx * 300000 - 20000,
+          replies: replies,
+        });
+      });
+    }
+    seedData();
+
+    // ----- 辅助 -----
+    function getTargetName(targetId) {
+      if (!targetId) return '未知';
+      const parts = targetId.split('-');
+      return parts[1] || targetId;
+    }
+    function formatTime(ts) {
+      const d = new Date(ts);
+      return d.toLocaleString('zh-CN', { hour12: false, hour:'2-digit', minute:'2-digit' });
+    }
+
+    // 计算老师综合评分 (基于吐槽数量，满分5分，每2条吐槽+0.5分，上限5分)
+    function calculateTeacherScore(teacherName) {
+      const targetId = `teacher-${teacherName}`;
+      const count = posts.filter(p => p.targetId === targetId).length;
+      // 基础分 2.0，每条+0.3，上限5.0
+      let score = 2.0 + count * 0.3;
+      if (score > 5.0) score = 5.0;
+      return Math.round(score * 10) / 10;
+    }
+
+    function renderMentions(text) {
+      const escaped = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      const withSpan = escaped.replace(/@(\S+?)(?=\s|$)/g, (match, name) => {
+        const entity = allEntities.find(e => e.name === name);
+        if (entity) {
+          return `<span class="mention" data-mention="${name}" data-type="${entity.type}">@${name}</span>`;
+        } else {
+          return `<span class="mention" style="cursor:default; background:#e2e8f0;">@${name}</span>`;
+        }
+      });
+      return withSpan;
+    }
+
+    function handleMentionClick(e) {
+      const el = e.currentTarget;
+      const name = el.dataset.mention;
+      const type = el.dataset.type;
+      if (!name) return;
+      const exists = allEntities.some(e => e.name === name && e.type === type);
+      if (!exists) {
+        alert(`未找到 "${name}"`);
+        return;
+      }
+      if (type === 'teacher') {
+        renderTeacherHome(name);
+      } else if (type === 'student') {
+        renderStudentHome(name);
+      }
+      renderGlobalFeed();
+      bindAllMentions();
+      document.getElementById(type === 'teacher' ? 'teacherHome' : 'studentHome').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function bindAllMentions() {
+      document.querySelectorAll('.mention[data-mention]').forEach(el => {
+        el.removeEventListener('click', handleMentionClick);
+        el.addEventListener('click', handleMentionClick);
+      });
+    }
+
+    // 全局委托
+    document.body.addEventListener('click', function(e) {
+      const mention = e.target.closest('.mention[data-mention]');
+      if (mention) {
+        if (mention._clickHandled) return;
+        mention._clickHandled = true;
+        handleMentionClick({ currentTarget: mention });
+        setTimeout(() => { mention._clickHandled = false; }, 100);
+      }
+    });
+
+    // ----- 渲染函数 -----
+    function renderGlobalFeed() {
+      const feed = document.getElementById('globalFeed');
+      if (!posts.length) {
+        feed.innerHTML = '<div class="empty-state">还没有吐槽，快发布一条吧</div>';
+        return;
+      }
+      const sorted = [...posts].sort((a,b) => b.timestamp - a.timestamp);
+      feed.innerHTML = sorted.slice(0, 10).map(p => {
+        const targetLabel = p.targetType === 'teacher' ? '👨‍🏫' : '🙋';
+        const targetShow = getTargetName(p.targetId);
+        return `
+          <div class="post-item">
+            <div class="post-meta">
+              <span class="name">${p.author}</span>
+              <span class="badge">${targetLabel} ${targetShow}</span>
+              <span>${formatTime(p.timestamp)}</span>
+            </div>
+            <div class="post-content">${renderMentions(p.content)}</div>
+            <div class="post-actions">
+              <span><i class="far fa-comment"></i> ${p.replies.length}</span>
+              <span onclick="window.replyToPost('${p.id}')"><i class="fas fa-reply"></i> 回复</span>
+            </div>
+            ${p.replies.slice(0, 2).map(r => `
+              <div class="reply">
+                <div class="post-meta"><span class="name">${r.author}</span> <span>${formatTime(r.timestamp)}</span></div>
+                <div>${renderMentions(r.content)}</div>
+              </div>
+            `).join('')}
+            ${p.replies.length > 2 ? `<div style="font-size:0.7rem; color:#94a3b8; text-align:right;">+${p.replies.length-2} 条回复</div>` : ''}
+          </div>
+        `;
+      }).join('');
+      bindAllMentions();
+    }
+
+    function renderTeacherHome(teacherName) {
+      const list = document.getElementById('teacherPostList');
+      const targetId = `teacher-${teacherName}`;
+      const filtered = posts.filter(p => p.targetId === targetId);
+      list.innerHTML = filtered.length ? filtered.sort((a,b) => b.timestamp - a.timestamp).map(p => `
+        <div class="post-item">
+          <div class="post-meta"><span class="name">${p.author}</span> <span>${formatTime(p.timestamp)}</span></div>
+          <div class="post-content">${renderMentions(p.content)}</div>
+          <div class="post-actions">
+            <span><i class="far fa-comment"></i> ${p.replies.length}</span>
+            <span onclick="window.replyToPost('${p.id}')"><i class="fas fa-reply"></i> 回复</span>
+          </div>
+          ${p.replies.slice(0, 2).map(r => `
+            <div class="reply">
+              <div class="post-meta"><span class="name">${r.author}</span> <span>${formatTime(r.timestamp)}</span></div>
+              <div>${renderMentions(r.content)}</div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('') : '<div class="empty-state">还没有吐槽这位老师 😶</div>';
+      document.getElementById('teacherNameDisplay').textContent = teacherName;
+      // 更新评分
+      const score = calculateTeacherScore(teacherName);
+      document.getElementById('teacherScoreValue').textContent = score.toFixed(1);
+      // 星星颜色
+      const star = document.querySelector('#teacherScoreDisplay i');
+      if (star) {
+        if (score >= 4.0) star.style.color = '#22c55e';
+        else if (score >= 2.5) star.style.color = '#f59e0b';
+        else star.style.color = '#ef4444';
+      }
+      bindAllMentions();
+    }
+
+    function renderStudentHome(studentName) {
+      const list = document.getElementById('studentPostList');
+      const targetId = `student-${studentName}`;
+      const filtered = posts.filter(p => p.targetId === targetId);
+      list.innerHTML = filtered.length ? filtered.sort((a,b) => b.timestamp - a.timestamp).map(p => `
+        <div class="post-item">
+          <div class="post-meta"><span class="name">${p.author}</span> <span>${formatTime(p.timestamp)}</span></div>
+          <div class="post-content">${renderMentions(p.content)}</div>
+          <div class="post-actions">
+            <span><i class="far fa-comment"></i> ${p.replies.length}</span>
+            <span onclick="window.replyToPost('${p.id}')"><i class="fas fa-reply"></i> 回复</span>
+          </div>
+          ${p.replies.slice(0, 2).map(r => `
+            <div class="reply">
+              <div class="post-meta"><span class="name">${r.author}</span> <span>${formatTime(r.timestamp)}</span></div>
+              <div>${renderMentions(r.content)}</div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('') : '<div class="empty-state">还没有日常吐槽 🌱</div>';
+      document.getElementById('studentNameDisplay').textContent = studentName;
+      bindAllMentions();
+    }
+
+    function renderAll() {
+      const teacherName = document.getElementById('teacherNameDisplay').textContent;
+      const studentName = document.getElementById('studentNameDisplay').textContent;
+      renderGlobalFeed();
+      renderTeacherHome(teacherName);
+      renderStudentHome(studentName);
+      bindAllMentions();
+    }
+
+    // ----- 搜索 -----
+    function performSearch(query) {
+      const resultsBox = document.getElementById('searchResults');
+      if (!query.trim()) {
+        resultsBox.classList.remove('active');
+        return;
+      }
+      const lower = query.trim().toLowerCase();
+      const matched = allEntities.filter(e => e.name.includes(query.trim()) || e.name.toLowerCase().includes(lower));
+      if (matched.length === 0) {
+        resultsBox.innerHTML = `<div style="padding:8px 0; color:#94a3b8;"><i class="fas fa-times-circle"></i> 未找到 “${query.trim()}”</div>`;
+        resultsBox.classList.add('active');
+        return;
+      }
+      resultsBox.innerHTML = matched.map(e => `
+        <span class="result-item" data-name="${e.name}" data-type="${e.type}">
+          <i class="fas ${e.type === 'teacher' ? 'fa-chalkboard-teacher' : 'fa-user-graduate'}"></i> ${e.name}
+        </span>
+      `).join('') + `<span style="font-size:0.75rem; color:#94a3b8; margin-left:12px;">点击切换</span>`;
+      resultsBox.classList.add('active');
+
+      document.querySelectorAll('.result-item').forEach(el => {
+        el.addEventListener('click', function() {
+          const name = this.dataset.name;
+          const type = this.dataset.type;
+          if (type === 'teacher') renderTeacherHome(name);
+          else renderStudentHome(name);
+          renderGlobalFeed();
+          resultsBox.classList.remove('active');
+          document.getElementById('searchInput').value = '';
+          bindAllMentions();
+        });
+      });
+    }
+
+    // ----- 发布 -----
+    function createPost(author, content, targetId) {
+      if (!author.trim()) author = '匿名同学';
+      if (!content.trim()) return alert('内容不能为空');
+      if (!targetId) return alert('请选择目标');
+      const targetType = targetId.startsWith('teacher-') ? 'teacher' : 'student';
+      posts.push({
+        id: postIdCounter++,
+        author: author.trim(),
+        content: content.trim(),
+        targetId: targetId,
+        targetType: targetType,
+        timestamp: Date.now(),
+        replies: [],
+      });
+      renderAll();
+    }
+
+    // ----- 回复 -----
+    window.replyToPost = function(postId) {
+      const replyText = prompt('回复这条吐槽 (支持 @) ：');
+      if (!replyText) return;
+      const post = posts.find(p => p.id == postId);
+      if (!post) return alert('帖子不存在');
+      const author = prompt('你的名字：', '匿名同学') || '匿名同学';
+      post.replies.push({ author: author, content: replyText, timestamp: Date.now() });
+      renderAll();
+    };
+
+    // ----- 事件绑定 -----
+    document.getElementById('searchBtn').addEventListener('click', function() {
+      performSearch(document.getElementById('searchInput').value);
+    });
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+      if (e.key === 'Enter') document.getElementById('searchBtn').click();
+    });
+
+    document.getElementById('quickPostBtn').addEventListener('click', function() {
+      const author = document.getElementById('quickAuthor').value || '匿名同学';
+      const content = document.getElementById('quickContent').value;
+      const targetId = document.getElementById('quickTarget').value;
+      createPost(author, content, targetId);
+      document.getElementById('quickContent').value = '';
+    });
+
+    document.getElementById('teacherReplyBtn').addEventListener('click', function() {
+      const author = document.getElementById('teacherReplyAuthor').value || '匿名同学';
+      const content = document.getElementById('teacherReplyContent').value;
+      const teacherName = document.getElementById('teacherNameDisplay').textContent;
+      createPost(author, content, `teacher-${teacherName}`);
+      document.getElementById('teacherReplyContent').value = '';
+    });
+
+    document.getElementById('studentPostBtn').addEventListener('click', function() {
+      const author = document.getElementById('studentPostAuthor').value || '匿名同学';
+      const content = document.getElementById('studentPostContent').value;
+      const studentName = document.getElementById('studentNameDisplay').textContent;
+      createPost(author, content, `student-${studentName}`);
+      document.getElementById('studentPostContent').value = '';
+    });
+
+    document.getElementById('teacherBadge').addEventListener('click', function() {
+      const choice = prompt('切换老师 (输入 张老师/李老师/王老师)：', '张老师');
+      if (choice && teachers.includes(choice)) { renderTeacherHome(choice); renderGlobalFeed(); bindAllMentions(); }
+      else if (choice) alert('可选: ' + teachers.join(', '));
+    });
+    document.getElementById('studentBadge').addEventListener('click', function() {
+      const choice = prompt('切换学生 (输入 小美/阿杰/小智)：', '小美');
+      if (choice && students.includes(choice)) { renderStudentHome(choice); renderGlobalFeed(); bindAllMentions(); }
+      else if (choice) alert('可选: ' + students.join(', '));
+    });
+
+    // 启动
+    renderAll();
+  })();
+</script>
+</body>
+</html>
